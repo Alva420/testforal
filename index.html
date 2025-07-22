@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>赛季精华抽卡模拟器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'quality-white': '#ffffff',
+                        'quality-green': '#4CAF50',
+                        'quality-blue': '#2196F3',
+                        'quality-purple': '#9C27B0',
+                        'quality-golden': '#FFC107',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .quality-border {
+                @apply border-2 rounded-lg p-2 mb-2 transition-all duration-300;
+            }
+            .quality-white-bg {
+                @apply bg-gray-100 border-gray-300 hover:bg-gray-200;
+            }
+            .quality-green-bg {
+                @apply bg-green-50 border-green-400 hover:bg-green-100;
+            }
+            .quality-blue-bg {
+                @apply bg-blue-50 border-blue-400 hover:bg-blue-100;
+            }
+            .quality-purple-bg {
+                @apply bg-purple-50 border-purple-400 hover:bg-purple-100;
+            }
+            .quality-golden-bg {
+                @apply bg-yellow-50 border-yellow-400 hover:bg-yellow-100;
+            }
+            .quality-glow {
+                @apply transition-all duration-300;
+            }
+            .quality-glow:hover {
+                @apply shadow-lg;
+            }
+            .quality-white-text {
+                @apply text-gray-700;
+            }
+            .quality-green-text {
+                @apply text-green-700;
+            }
+            .quality-blue-text {
+                @apply text-blue-700;
+            }
+            .quality-purple-text {
+                @apply text-purple-700;
+            }
+            .quality-golden-text {
+                @apply text-yellow-700;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <header class="text-center mb-8">
+            <h1 class="text-[clamp(2rem,5vw,3rem)] font-bold text-gray-800 mb-2">赛季精华抽卡模拟器</h1>
+            <p class="text-gray-600">模拟游戏抽卡体验，包含保底机制和多种品质物品</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- 左侧：抽卡区域 -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6 transform hover:shadow-xl transition-all duration-300">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fa fa-gift mr-2"></i>抽卡
+                    </h2>
+                    <div class="flex flex-wrap gap-3 mb-6">
+                        <button id="single_draw" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition-all duration-300 flex items-center transform hover:scale-105">
+                            <i class="fa fa-refresh mr-2"></i>单抽
+                        </button>
+                        <button id="ten_draws" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-lg transition-all duration-300 flex items-center transform hover:scale-105">
+                            <i class="fa fa-refresh fa-spin mr-2"></i>十连抽
+                        </button>
+                        <button id="max_draws" class="bg-yellow-600 hover:bg-yellow-700 text-white font-medium py-2 px-6 rounded-lg transition-all duration-300 flex items-center transform hover:scale-105">
+                            <i class="fa fa-bolt mr-2"></i>抽到保底
+                        </button>
+                        <button id="reset" class="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-6 rounded-lg transition-all duration-300 flex items-center transform hover:scale-105">
+                            <i class="fa fa-refresh mr-2"></i>重置
+                        </button>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div id="pity_label" class="text-gray-700 font-medium mb-2">保底计数：蓝(0) | 紫(0) | 金(0)</div>
+                        <div class="h-4 bg-gray-200 rounded-full overflow-hidden">
+                            <div id="pity_progress" class="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-yellow-500 transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-4 h-64 overflow-y-auto" id="output">
+                        <p class="text-gray-500">欢迎使用抽卡模拟器！点击上方按钮开始抽卡。</p>
+                    </div>
+                </div>
+                
+                <!-- 历史记录 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 transform hover:shadow-xl transition-all duration-300">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fa fa-history mr-2"></i>抽卡历史
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h3 class="font-medium text-purple-700 mb-2 flex items-center">
+                                <i class="fa fa-diamond mr-2"></i>奇珍品质（紫色）
+                            </h3>
+                            <ul id="purple_history" class="space-y-1 max-h-40 overflow-y-auto">
+                                <li class="text-gray-500 italic">暂无记录</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-medium text-yellow-700 mb-2 flex items-center">
+                                <i class="fa fa-star mr-2"></i>稀世品质（金色）
+                            </h3>
+                            <ul id="golden_history" class="space-y-1 max-h-40 overflow-y-auto">
+                                <li class="text-gray-500 italic">暂无记录</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右侧：统计和配置 -->
+            <div>
+                <!-- 统计信息 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6 transform hover:shadow-xl transition-all duration-300">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fa fa-bar-chart mr-2"></i>抽卡统计
+                    </h2>
+                    <div class="space-y-3">
+                        <div class="quality-border quality-white-bg quality-glow">
+                            <span class="quality-white-text font-medium">普通品质（白色）</span>
+                            <span id="white_count" class="float-right text-gray-600">0 次</span>
+                        </div>
+                        <div class="quality-border quality-green-bg quality-glow">
+                            <span class="quality-green-text font-medium">罕见品质（绿色）</span>
+                            <span id="green_count" class="float-right text-gray-600">0 次</span>
+                        </div>
+                        <div class="quality-border quality-blue-bg quality-glow">
+                            <span class="quality-blue-text font-medium">独特品质（蓝色）</span>
+                            <span id="blue_count" class="float-right text-gray-600">0 次</span>
+                        </div>
+                        <div class="quality-border quality-purple-bg quality-glow">
+                            <span class="quality-purple-text font-medium">奇珍品质（紫色）</span>
+                            <span id="purple_count" class="float-right text-gray-600">0 次</span>
+                        </div>
+                        <div class="quality-border quality-golden-bg quality-glow">
+                            <span class="quality-golden-text font-medium">稀世品质（金色）</span>
+                            <span id="golden_count" class="float-right text-gray-600">0 次</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 概率信息 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 transform hover:shadow-xl transition-all duration-300">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                        <i class="fa fa-percent mr-2"></i>概率信息
+                    </h2>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full bg-gray-300 mr-2"></div>
+                            <span class="text-sm text-gray-700">普通品质（白色）：</span>
+                            <span class="ml-auto font-medium">31.7%</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full bg-green-400 mr-2"></div>
+                            <span class="text-sm text-gray-700">罕见品质（绿色）：</span>
+                            <span class="ml-auto font-medium">49.8%</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full bg-blue-400 mr-2"></div>
+                            <span class="text-sm text-gray-700">独特品质（蓝色）：</span>
+                            <span class="ml-auto font-medium">10.2%</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full bg-purple-400 mr-2"></div>
+                            <span class="text-sm text-gray-700">奇珍品质（紫色）：</span>
+                            <span class="ml-auto font-medium">2.5%</span>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 rounded-full bg-yellow-400 mr-2"></div>
+                            <span class="text-sm text-gray-700">稀世品质（金色）：</span>
+                            <span class="ml-auto font-medium">0.7%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <h3 class="font-medium text-gray-700 mb-2">保底机制</h3>
+                        <div class="space-y-1 text-sm text-gray-600">
+                            <p>• 蓝色品质：10抽保底</p>
+                            <p>• 紫色品质：60抽保底</p>
+                            <p>• 金色品质：200抽保底</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer class="mt-8 text-center text-gray-500 text-sm">
+            <p>© 2025 赛季精华抽卡模拟器 | 仅供娱乐</p>
+        </footer>
+    </div>
+
+    <script>
+        // 配置参数
+        const CONFIG = {
+            white: { name: "普通品质（白色）", base_prob: 31.7, items: [
+                "【涂鸦】“噩梦”-彩底", "【涂鸦】“小女孩”-彩底", "【涂鸦】病患-彩底", 
+                "【涂鸦】击球手-彩底", "【涂鸦】哭泣小丑-彩底", "【涂鸦】蜡像师-彩底", 
+                "【涂鸦】“心理学家”-彩底", "【头像】彩色回忆-勘探员", 
+                "【头像】彩色回忆-咒术师", "【头像】彩色回忆 - 26号守卫", 
+                "【头像】彩色回忆 - 红夫人"
+            ]},
+            green: { name: "罕见品质（绿色）", base_prob: 49.8, items: [
+                "【时装】红夫人 - 落日黄", "【时装】孽蜥 - 紫乌头", "【时装】杂技演员 - 绯红", 
+                "【时装】邮差 - 风度粉", "【个性动作】古董商 - 躺地", "【个性动作】入殓师 - 挑衅", 
+                "【个性动作】杂技演员 - 呼喊", "【个性动作】杂技演员 - 躺地", 
+                "【等待动作】魔术师 - 小憩", "【等待动作】“慈善家”- 准备", 
+                "【等待动作】空军 - 小憩", "【等待动作】律师 - 小憩", 
+                "【等待动作】魔术师 - 等待", "【涂鸦】摄影师-个性", 
+                "【涂鸦】调酒师-个性", "【涂鸦】舞女-个性", "【涂鸦】宿伞之魂-个性", 
+                "【头像】黑白回忆-作曲家", "【头像】黑白回忆-记者", "【头像】黑白回忆-小说家"
+            ]},
+            blue: { name: "独特品质（蓝色）", base_prob: 10.2, pity_limit: 10, items: [
+                "【时装】鹿头-巡视守卫", "【时装】昆虫学者-螫针", "【时装】梦之女巫-银行经理", 
+                "【时装】野人-故事迷", "【时装】杂技演员-锢影", "【个性动作】入殓师-起舞", 
+                "【个性动作】守夜人-行礼", "【等待动作】“使徒”-示咸", "【等待动作】红夫人-笑颜", 
+                "【时装】“杰克”-黑男爵", "【时装】医生-肃静蓝", "【时装】魔术师-葡萄酒", 
+                "【时装】机械师-墨黑", "【时装】黄衣之主 - 青苔", "【时装】入殓师 - 休闲黄", 
+                "【时装】爱哭鬼 - 白糖"
+            ]},
+            purple: { name: "奇珍品质（紫色）", base_prob: 2.5, pity_limit: 60, items: [
+                "【时装】守墓人-冥契", "【时装】医生-银锑"
+            ]},
+            golden: { name: "稀世品质（金色）", base_prob: 0.7, pity_limit: 200, items: [
+                "【时装】隐士-薄金[限定]"
+            ]}
+        };
+
+        const ESSENCE_PER_DRAW = 96;
+
+        // 初始化计数器
+        let pity_blue = 0;
+        let pity_purple = 0;
+        let pity_golden = 0;
+
+        let total_draws = 0;
+        let total_essence = 0;
+
+        // 品质统计
+        const quality_counter = {
+            "普通品质（白色）": 0,
+            "罕见品质（绿色）": 0,
+            "独特品质（蓝色）": 0,
+            "奇珍品质（紫色）": 0,
+            "稀世品质（金色）": 0
+        };
+
+        // 物品统计
+        const item_counter = {};
+        for (const quality in CONFIG) {
+            CONFIG[quality].items.forEach(item => {
+                item_counter[item] = 0;
+            });
+        }
+
+        // 抽中记录
+        const purple_draws = [];
+        const golden_draws = [];
+
+        // 修正后的 PRD 概率曲线函数
+        function get_purple_probability(pity) {
+            if (pity >= CONFIG.purple.pity_limit) return 100.0;
+            else if (pity < 15) return 0.67; // 10%/15 ≈ 0.67%
+            else if (pity < 30) return 1.27; // (38%-10%)/15 ≈ 1.27%
+            else return 2.5 + (pity - 30) * (97.5/(CONFIG.purple.pity_limit-30)); // 线性增长至100%
+        }
+
+        function get_golden_probability(pity) {
+            if (pity >= CONFIG.golden.pity_limit) return 100.0;
+            else if (pity < 50) return 0.126; // 6.3%/50 ≈ 0.126%
+            else if (pity < 100) return 0.376; // (25%-6.3%)/50 ≈ 0.376%
+            else if (pity < 150) return 0.7; // (0.7%平均概率推算)
+            else return 0.7 + (pity - 150) * (99.3/(CONFIG.golden.pity_limit-150)); // 线性增长至100%
+        }
+
+        // 随机从列表中选择一个物品
+        function get_random_item(quality) {
+            const items = CONFIG[quality].items;
+            const randomIndex = Math.floor(Math.random() * items.length);
+            return items[randomIndex];
+        }
+
+        // 获取当前概率分布（优化版）
+        function get_current_probabilities() {
+            // 基础概率
+            let prob_white = CONFIG.white.base_prob;
+            let prob_green = CONFIG.green.base_prob;
+            let prob_blue = CONFIG.blue.base_prob;
+            
+            // 保底检查
+            if (pity_blue >= CONFIG.blue.pity_limit) {
+                prob_blue = 100;
+            }
+            
+            // 动态概率
+            const prob_purple = get_purple_probability(pity_purple);
+            const prob_golden = get_golden_probability(pity_golden);
+            
+            // 概率归一化处理
+            const total = prob_white + prob_green + prob_blue + prob_purple + prob_golden;
+            if (total > 100) {
+                const scale = 100 / total;
+                prob_white *= scale;
+                prob_green *= scale;
+                prob_blue *= scale;
+            }
+            
+            // 构建概率区间
+            let probabilities = [];
+            let start = 0;
+            
+            // 从高到低添加概率区间
+            if (prob_golden > 0) {
+                probabilities.push([start, start + prob_golden, "golden"]);
+                start += prob_golden;
+            }
+            if (prob_purple > 0) {
+                probabilities.push([start, start + prob_purple, "purple"]);
+                start += prob_purple;
+            }
+            if (prob_blue > 0) {
+                probabilities.push([start, start + prob_blue, "blue"]);
+                start += prob_blue;
+            }
+            if (prob_green > 0) {
+                probabilities.push([start, start + prob_green, "green"]);
+                start += prob_green;
+            }
+            if (prob_white > 0) {
+                probabilities.push([start, start + prob_white, "white"]);
+                start += prob_white;
+            }
+            
+            return probabilities;
+        }
+
+        // 获取品质对应的CSS类
+        function get_quality_css_class(quality) {
+            switch(quality) {
+                case "white": return "quality-white-text";
+                case "green": return "quality-green-text";
+                case "blue": return "quality-blue-text";
+                case "purple": return "quality-purple-text";
+                case "golden": return "quality-golden-text";
+                default: return "text-gray-700";
+            }
+        }
+
+        // 执行一次抽卡
+        function draw_card() {
+            total_draws++;
+            total_essence += ESSENCE_PER_DRAW;
+            
+            const probabilities = get_current_probabilities();
+            const rand_num = Math.random() * 100;
+            
+            for (const [start, end, quality] of probabilities) {
+                if (rand_num >= start && rand_num < end) {
+                    const item = get_random_item(quality);
+                    item_counter[item]++;
+                    
+                    // 更新保底计数器
+                    if (quality === "golden") {
+                        golden_draws.push({draw: total_draws, item: item});
+                        pity_golden = 0;
+                        pity_purple = 0;
+                        pity_blue = 0;
+                    } else if (quality === "purple") {
+                        purple_draws.push({draw: total_draws, item: item});
+                        pity_golden++;
+                        pity_purple = 0;
+                        pity_blue++;
+                    } else if (quality === "blue") {
+                        pity_golden++;
+                        pity_purple++;
+                        pity_blue = 0;
+                    } else {
+                        pity_golden++;
+                        pity_purple++;
+                        pity_blue++;
+                    }
+                    
+                    // 更新品质统计
+                    quality_counter[CONFIG[quality].name]++;
+                    update_gui(quality, item);
+                    update_stats_labels();
+                    update_history_list();
+                    update_pity_progress();
+                    return;
+                }
+            }
+            
+            // 默认返回（理论上不会执行到这里）
+            const default_quality = "white";
+            const item = get_random_item(default_quality);
+            item_counter[item]++;
+            quality_counter[CONFIG[default_quality].name]++;
+            update_gui(default_quality, item);
+            update_stats_labels();
+            update_pity_progress();
+        }
+
+        // 更新保底进度条
+        function update_pity_progress() {
+            const golden_progress = (pity_golden / CONFIG.golden.pity_limit) * 100;
+            document.getElementById('pity_progress').style.width = `${golden_progress}%`;
+        }
+
+        // 更新 GUI 显示
+        function update_gui(quality, item) {
+            const output = document.getElementById("output");
+            const quality_name = CONFIG[quality].name;
+            const css_class = get_quality_css_class(quality);
+            
+            const message = `<span class="${css_class}">第${total_draws}次抽卡：${quality_name} - ${item} | 保底 [蓝:${pity_blue}, 紫:${pity_purple}, 金:${pity_golden}]</span><br>`;
+            output.innerHTML += message;
+            output.scrollTop = output.scrollHeight;
+
+            document.getElementById("pity_label").innerText =
+                `保底计数：蓝(${pity_blue}) | 紫(${pity_purple}) | 金(${pity_golden})`;
+        }
+
+        // 更新统计 Label
+        function update_stats_labels() {
+            for (const quality in CONFIG) {
+                const quality_name = CONFIG[quality].name;
+                document.getElementById(`${quality}_count`).innerText = 
+                    `${quality_name}: ${quality_counter[quality_name]} 次`;
+            }
+        }
+
+        // 更新历史记录列表
+        function update_history_list() {
+            const purple_history = document.getElementById("purple_history");
+            const golden_history = document.getElementById("golden_history");
+            
+            if (purple_draws.length === 0) {
+                purple_history.innerHTML = '<li class="text-gray-500 italic">暂无记录</li>';
+            } else {
+                purple_history.innerHTML = '';
+                purple_draws.forEach(record => {
+                    const li = document.createElement("li");
+                    li.className = "quality-purple-text";
+                    li.innerHTML = `第 <span class="font-medium">${record.draw}</span> 次: ${record.item}`;
+                    purple_history.appendChild(li);
+                });
+            }
+            
+            if (golden_draws.length === 0) {
+                golden_history.innerHTML = '<li class="text-gray-500 italic">暂无记录</li>';
+            } else {
+                golden_history.innerHTML = '';
+                golden_draws.forEach(record => {
+                    const li = document.createElement("li");
+                    li.className = "quality-golden-text";
+                    li.innerHTML = `第 <span class="font-medium">${record.draw}</span> 次: ${record.item}`;
+                    golden_history.appendChild(li);
+                });
+            }
+        }
+
+        // 抽卡按钮事件
+        function onSingleDraw() {
+            draw_card();
+        }
+
+        function onTenDraws() {
+            for (let i = 0; i < 10; i++) {
+                setTimeout(draw_card, i * 100); // 100ms间隔
+            }
+        }
+
+        function onMaxDraws() {
+            const target_draws = CONFIG.golden.pity_limit - pity_golden;
+            let delay = 0;
+            for (let i = 0; i < target_draws; i++) {
+                setTimeout(draw_card, delay);
+                delay += i % 10 === 0 ? 100 : 20; // 每10次抽卡间隔100ms，其余间隔20ms
+            }
+        }
+
+        // 重置功能
+        function reset() {
+            pity_blue = 0;
+            pity_purple = 0;
+            pity_golden = 0;
+
+            total_draws = 0;
+            total_essence = 0;
+
+            for (const key in quality_counter) {
+                quality_counter[key] = 0;
+            }
+            
+            for (const key in item_counter) {
+                item_counter[key] = 0;
+            }
+
+            purple_draws.length = 0;
+            golden_draws.length = 0;
+
+            document.getElementById("output").innerHTML = "";
+            document.getElementById("pity_label").innerText = `保底计数：蓝(0) | 紫(0) | 金(0)`;
+            document.getElementById("pity_progress").style.width = "0%";
+            update_stats_labels();
+            update_history_list();
+        }
+
+        // 初始化UI
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('single_draw').addEventListener('click', onSingleDraw);
+            document.getElementById('ten_draws').addEventListener('click', onTenDraws);
+            document.getElementById('max_draws').addEventListener('click', onMaxDraws);
+            document.getElementById('reset').addEventListener('click', reset);
+            update_stats_labels();
+            update_history_list();
+        });
+    </script>
+</body>
+</html>
+    
