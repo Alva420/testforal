@@ -1,0 +1,46 @@
+@tailwind utilities;
+
+@layer utilities {
+  .content-auto {
+    content-visibility: auto;
+  }
+  .quality-border {
+    @apply border-2 rounded-lg p-2 mb-2 transition-all duration-300;
+  }
+  .quality-white-bg {
+    @apply bg-gray-100 border-gray-300 hover:bg-gray-200;
+  }
+  .quality-green-bg {
+    @apply bg-green-50 border-green-400 hover:bg-green-100;
+  }
+  .quality-blue-bg {
+    @apply bg-blue-50 border-blue-400 hover:bg-blue-100;
+  }
+  .quality-purple-bg {
+    @apply bg-purple-50 border-purple-400 hover:bg-purple-100;
+  }
+  .quality-golden-bg {
+    @apply bg-yellow-50 border-yellow-400 hover:bg-yellow-100;
+  }
+  .quality-glow {
+    @apply transition-all duration-300;
+  }
+  .quality-glow:hover {
+    @apply shadow-lg;
+  }
+  .quality-white-text {
+    @apply text-gray-700;
+  }
+  .quality-green-text {
+    @apply text-green-700;
+  }
+  .quality-blue-text {
+    @apply text-blue-700;
+  }
+  .quality-purple-text {
+    @apply text-purple-700;
+  }
+  .quality-golden-text {
+    @apply text-yellow-700;
+  }
+}
